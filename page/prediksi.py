@@ -5,9 +5,9 @@ from transformers import BertTokenizer, BertForSequenceClassification
 import torch
 
 # Load the saved model and tokenizer
-MODEL_DIR = "models"  # Ganti sesuai lokasi folder model
-tokenizer = BertTokenizer.from_pretrained(MODEL_DIR)
-model = BertForSequenceClassification.from_pretrained(MODEL_DIR)
+#MODEL_DIR = "models"  # Ganti sesuai lokasi folder model
+tokenizer = BertTokenizer.from_pretrained('indobenchmark/indobert-base-p1')
+model = BertForSequenceClassification.from_pretrained("diiadi/sentiment-gplay")
 
 # Set device to CUDA if available
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
