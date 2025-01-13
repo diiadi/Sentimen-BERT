@@ -52,7 +52,7 @@ if authenticated_user:
 
     with st.sidebar:
         if st.button("Logout", type="primary"):
-            
+            st.session_state.clear()
             cookies['authenticated'] = ""
             cookies['role'] = ""
             cookies.save()  # Ensure the deletion is saved immediately
