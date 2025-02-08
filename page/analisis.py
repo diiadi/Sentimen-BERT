@@ -4,6 +4,7 @@ import numpy as np
 from tqdm import tqdm
 from stqdm import stqdm
 import nltk
+from collections import Counter
 from nltk.corpus import stopwords
 from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
 import matplotlib.pyplot as plt
@@ -88,15 +89,31 @@ def predict_sentiment(texts):
         predictions.append(pred)
     return predictions
 
-# Generate WordCloud
-def generate_wordcloud(data, sentiment, column):
+# Fungsi untuk Generate WordCloud dengan Frekuensi, Tabel, dan Grafik
+def generate_wordcloud_with_frequency(data, sentiment, column):
     words = " ".join(data[data["predicted"] == sentiment][column])
-    wordcloud = WordCloud(width=800, height=400, background_color="white").generate(words)
+    word_counts = Counter(words.split())
+
+    # Generate WordCloud
+    wordcloud = WordCloud(width=800, height=400, background_color="white").generate_from_frequencies(word_counts)
     fig, ax = plt.subplots(figsize=(10, 5))
     ax.imshow(wordcloud, interpolation="bilinear")
-    ax.axis("off")
-    ax.set_title(f"WordCloud for {sentiment} Sentiment")
+    ax.set_title(f"WordCloud untuk Sentimen {sentiment} (dengan Frekuensi)")
     st.pyplot(fig)
+
+    # Tampilkan Tabel Frekuensi Kata
+    st.subheader(f"Frekuensi Kata untuk Sentimen {sentiment}")
+    most_common = word_counts.most_common(20)  # Ambil 20 kata paling umum
+    freq_df = pd.DataFrame(most_common, columns=["Kata", "Frekuensi"])
+    st.dataframe(freq_df)  # Tampilkan dalam tabel Streamlit
+
+    # Tampilkan Grafik Frekuensi Kata (Seaborn)
+    st.subheader(f"Grafik Frekuensi Kata untuk Sentimen {sentiment}")
+    plt.figure(figsize=(10, 6))  # Adjust figure size as needed
+    sns.barplot(x='Kata', y='Frekuensi', data=freq_df)
+    plt.xticks(rotation=45, ha='right')  # Rotate x-axis labels for readability
+    plt.title(f"Top 20 Kata - Sentimen {sentiment}")
+    st.pyplot(plt.gcf())  # Use st.pyplot to display the Matplotlib chart
 
 # Streamlit UI
 st.title("Sentiment Analysis Youtube")
@@ -159,13 +176,13 @@ if uploaded_file:
         )
         st.pyplot(fig)
 
-        # Display WordClouds
-        st.subheader("WordClouds")
-        st.write("Positive Sentiment:")
-        generate_wordcloud(df, 1, "textDisplay_stemmed")
+        # Tampilkan WordCloud dengan Frekuensi, Tabel, dan Grafik
+        st.subheader("WordCloud dengan Frekuensi, Tabel, dan Grafik")
+        st.write("Sentimen Positif:")
+        generate_wordcloud_with_frequency(df, 1, "textDisplay_stemmed")
 
-        st.write("Negative Sentiment:")
-        generate_wordcloud(df, 0, "textDisplay_stemmed")
+        st.write("Sentimen Negatif:")
+        generate_wordcloud_with_frequency(df, 0, "textDisplay_stemmed")
 
         # Downloadable CSV
         st.subheader("Download Results")
